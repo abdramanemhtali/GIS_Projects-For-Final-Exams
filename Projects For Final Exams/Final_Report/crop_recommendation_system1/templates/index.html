@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-seedling"></i> Crop Recommendation System</h1>
+            <p>Upload your ML model and data to get crop recommendations</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-card">
+                <h2><i class="fas fa-upload"></i> Upload ML Model</h2>
+                <p>Upload your trained XGBoost model (.pkl file)</p>
+                <form id="modelForm" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <input type="file" id="modelFile" name="model_file" accept=".pkl" required>
+                        <label for="modelFile">Choose File</label>
+                        <span id="modelFileName">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn">Upload Model</button>
+                </form>
+                <div id="modelStatus" class="status"></div>
+            </div>
+
+            <div class="upload-card">
+                <h2><i class="fas fa-table"></i> Upload Data</h2>
+                <p>Upload your tabular data (.csv or .xlsx file)</p>
+                <form id="dataForm" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <input type="file" id="dataFile" name="data_file" accept=".csv,.xlsx" required>
+                        <label for="dataFile">Choose File</label>
+                        <span id="dataFileName">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn">Upload Data</button>
+                </form>
+                <div id="dataStatus" class="status"></div>
+            </div>
+        </div>
+
+        <div class="prediction-section">
+            <h2><i class="fas fa-magic"></i> Make Prediction</h2>
+            <p>Use your uploaded model and data to get predictions</p>
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="selectedModel">Select Model:</label>
+                    <select id="selectedModel" name="model_filename" required>
+                        <option value="">-- Select a model --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selectedData">Select Data:</label>
+                    <select id="selectedData" name="data_filename" required>
+                        <option value="">-- Select data file --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn predict-btn">Predict</button>
+            </form>
+            <div id="predictionResult" class="result-container">
+                <h3>Prediction Results</h3>
+                <div id="predictions"></div>
+                <a id="downloadLink" class="download-btn" style="display: none;">
+                    <i class="fas fa-download"></i> Download Predictions
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Update file names when selected
+            $('#modelFile').change(function() {
+                $('#modelFileName').text(this.files[0] ? this.files[0].name : 'No file chosen');
+            });
+
+            $('#dataFile').change(function() {
+                $('#dataFileName').text(this.files[0] ? this.files[0].name : 'No file chosen');
+            });
+
+            // Model upload form
+            $('#modelForm').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                
+                $.ajax({
+                    url: '/upload_model',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#modelStatus').html('<div class="success"><i class="fas fa-check-circle"></i> ' + response.message + '</div>');
+                            updateModelDropdown();
+                        } else {
+                            $('#modelStatus').html('<div class="error"><i class="fas fa-times-circle"></i> ' + response.message + '</div>');
+                        }
+                    },
+                    error: function() {
+                        $('#modelStatus').html('<div class="error"><i class="fas fa-times-circle"></i> Error uploading model</div>');
+                    }
+                });
+            });
+
+            // Data upload form
+            $('#dataForm').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                
+                $.ajax({
+                    url: '/upload_data',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#dataStatus').html('<div class="success"><i class="fas fa-check-circle"></i> ' + response.message + '</div>');
+                            updateDataDropdown();
+                        } else {
+                            $('#dataStatus').html('<div class="error"><i class="fas fa-times-circle"></i> ' + response.message + '</div>');
+                        }
+                    },
+                    error: function() {
+                        $('#dataStatus').html('<div class="error"><i class="fas fa-times-circle"></i> Error uploading data</div>');
+                    }
+                });
+            });
+
+            // Prediction form
+            $('#predictionForm').submit(function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Display predictions
+                            let predictionsHtml = '<ul>';
+                            response.predictions.forEach(pred => {
+                                predictionsHtml += `<li>${pred}</li>`;
+                            });
+                            predictionsHtml += '</ul>';
+                            $('#predictions').html(predictionsHtml);
+                            
+                            // Show download link
+                            $('#downloadLink').attr('href', response.download_url).show();
+                        } else {
+                            $('#predictions').html('<div class="error"><i class="fas fa-times-circle"></i> ' + response.message + '</div>');
+                            $('#downloadLink').hide();
+                        }
+                    },
+                    error: function() {
+                        $('#predictions').html('<div class="error"><i class="fas fa-times-circle"></i> Error making predictions</div>');
+                        $('#downloadLink').hide();
+                    }
+                });
+            });
+
+            // Update dropdowns with available files
+            function updateModelDropdown() {
+                $.get('/get_models', function(data) {
+                    $('#selectedModel').empty().append('<option value="">-- Select a model --</option>');
+                    data.models.forEach(model => {
+                        $('#selectedModel').append(`<option value="${model}">${model}</option>`);
+                    });
+                });
+            }
+
+            function updateDataDropdown() {
+                $.get('/get_data', function(data) {
+                    $('#selectedData').empty().append('<option value="">-- Select data file --</option>');
+                    data.files.forEach(file => {
+                        $('#selectedData').append(`<option value="${file}">${file}</option>`);
+                    });
+                });
+            }
+
+            // Add endpoints to get available files (need to add these to app.py)
+            // Initialize dropdowns
+            updateModelDropdown();
+            updateDataDropdown();
+        });
+    </script>
+</body>
+</html>

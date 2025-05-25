@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildfire Risk Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-fire"></i> Crop Suitability Prediction System</h1>
+            <p>Upload your ML model and geospatial data to generate Crop Suitability Prediction System</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-card">
+                <h2><i class="fas fa-upload"></i> Upload ML Model</h2>
+                <p>Upload your trained model (.pkl file)</p>
+                <form id="modelForm" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <input type="file" id="modelFile" name="model_file" accept=".pkl" required>
+                        <label for="modelFile">Choose File</label>
+                        <span id="modelFileName">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn">Upload Model</button>
+                </form>
+                <div id="modelStatus" class="status"></div>
+            </div>
+
+            <div class="upload-card">
+                <h2><i class="fas fa-map"></i> Upload Geospatial Data</h2>
+                <p>Upload your TIFF files for prediction</p>
+                <form id="tiffForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="tiffType">Data Type:</label>
+                        <select id="tiffType" name="tiff_type" required>
+                            <option value="">-- Select data type --</option>
+                            <option value="Albedo">Albedo</option>
+                            <option value="Annual_Temperature">Annual Temperature</option>
+                            <option value="Aspect">Aspect</option>
+                            <option value="Clay_Content">Clay Content</option>
+                            <option value="DEM_Antalya">DEM Antalya</option>
+                            <option value="Land_Cover">Land Cover</option>
+                            <option value="LandUse">Land Use</option>
+                            <option value="LST">LST</option>
+                            <option value="NDVI_StdDev_Antalya">NDVI StdDev Antalya</option>
+                            <option value="Precipitation_Antalya">Precipitation Antalya</option>
+                            <option value="Slope">Slope</option>
+                            <option value="Soil_Organic_Carbon">Soil Organic Carbon</option>
+                            <option value="Soil_pH">Soil pH</option>
+                            <option value="SoilpH">Soil pH (alt)</option>
+                            <option value="SoilTexture">Soil Texture</option>
+                        </select>
+                    </div>
+                    <div class="file-upload">
+                        <input type="file" id="tiffFile" name="tiff_file" accept=".tif,.tiff" required>
+                        <label for="tiffFile">Choose TIFF File</label>
+                        <span id="tiffFileName">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn">Upload TIFF</button>
+                </form>
+                <div id="tiffStatus" class="status"></div>
+            </div>
+        </div>
+
+        <div class="data-status">
+            <h3><i class="fas fa-database"></i> Uploaded Data</h3>
+            <div id="uploadedTiffs" class="uploaded-files">
+                <p>No TIFF files uploaded yet</p>
+            </div>
+        </div>
+
+        <div class="prediction-section">
+            <h2><i class="fas fa-chart-area"></i> Generate Prediction</h2>
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="selectedModel">Select Model:</label>
+                    <select id="selectedModel" name="model_filename" required>
+                        <option value="">-- Select a model --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn predict-btn">
+                    <span id="predictButtonText">Generate Wildfire Risk Map</span>
+                    <span id="predictSpinner" class="spinner"><i class="fas fa-spinner fa-spin"></i></span>
+                </button>
+            </form>
+            
+            <div id="mapSection" style="display: none;">
+                <h3><i class="fas fa-map-marked-alt"></i> Prediction Map</h3>
+                <div id="mapContainer">
+                    <div id="predictionMap" class="map-placeholder">
+                        <p>Map will be displayed here after prediction</p>
+                    </div>
+                </div>
+                <div class="map-controls">
+                    <a id="downloadTiffLink" class="download-btn">
+                        <i class="fas fa-download"></i> Download GeoTIFF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
