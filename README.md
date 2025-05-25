@@ -63,7 +63,7 @@ A simple web application was developed using **Flask** and **Leaflet** to:
 
 You can read the full project report detailing methodology, data sources, model comparison, and system design here:
 
-📎 [**Final Project Report (PDF)**](https://github.com/abdramanemhtali/GIS_Projects-For-Final-Exams/blob/main/Final_Report/Final_Exam_Projects_A1.pdf)
+📎 [**Final Project Report (PDF)**]([https://github.com/abdramanemhtali/GIS_Projects-For-Final-Exams/blob/main/Final_Report/Final_Exam_Projects_A1.pdf](https://github.com/abdramanemhtali/GIS_Projects-For-Final-Exams/blob/main/Projects%20For%20Final%20Exams/Final_Report/Final_Exam_Projects_A1.pdf))
 
 ---
 
