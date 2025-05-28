@@ -65,6 +65,8 @@ You can read the full project report detailing methodology, data sources, model 
 
 📎 [**Final Project Report (PDF)**](https://github.com/abdramanemhtali/GIS_Projects-For-Final-Exams/blob/main/Projects%20For%20Final%20Exams/Final_Report/Final_Exam_Projects_A1.pdf)
 
+📎 [**Final Project Report (PDF)**](https://github.com/abdramanemhtali/GIS_Projects-For-Final-Exams/blob/main/Projects%20For%20Final%20Exams/Final_Report/Final_Exam_Projects_A1.pdf)
+
 ---
 
 ## 🔧 Tools & Technologies
